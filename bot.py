@@ -155,7 +155,7 @@ async def send_invoice(message: Message, user_id: int):
         title="Курс 'Призвание'",
         description="Система поиска призвания за 30 дней. 10 модулей + рабочая тетрадь + комьюнити.",
         payload=f"course_{user_id}",
-        provider_token="1268251:TEST:1",
+        provider_token="390540012:LIVE:89572",
         currency="RUB",
         prices=[
             LabeledPrice(label="Курс 'Призвание'", amount=COURSE_PRICE * 100)  # в копейках
