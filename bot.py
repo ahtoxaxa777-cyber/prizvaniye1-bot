@@ -197,6 +197,9 @@ async def successful_payment(message: Message):
 
 async def main():
     """Запуск бота"""
+    # Удаляем webhook если есть
+    await bot.delete_webhook(drop_pending_updates=True)
+    
     logger.info("Бот запущен!")
     
     # Инициализация БД
