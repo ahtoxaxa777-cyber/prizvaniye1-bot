@@ -16,7 +16,7 @@ COURSE_PRICE = 9900  # в рублях
 # ========== ССЫЛКИ (МЕНЯЙ ЗДЕСЬ) ==========
 
 # МОДУЛЬ 0 (лид-магнит, бесплатный)
-NOTION_MODULE0 = "https://tame-headstand-52f.notion.site/1-30681644b85b809b8c5ce09eace5f114"
+NOTION_MODULE0 = "https://tame-headstand-52f.notion.site/0-30681644b85b809b8c5ce09eace5f114?source=copy_link"
 
 # МОДУЛИ 1-10 (платные)
 NOTION_MODULE1 = "https://notion.so/module1"  # ВСТАВЬ ССЫЛКУ
