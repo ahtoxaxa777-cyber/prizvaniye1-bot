@@ -4,7 +4,7 @@
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import (
-    NOTION_MODULE1, NOTION_MODULE2, NOTION_MODULE3, NOTION_MODULE4, NOTION_MODULE5,
+    NOTION_MODULE0, NOTION_MODULE1, NOTION_MODULE2, NOTION_MODULE3, NOTION_MODULE4, NOTION_MODULE5,
     NOTION_MODULE6, NOTION_MODULE7, NOTION_MODULE8, NOTION_MODULE9, NOTION_MODULE10,
     COMMUNITY_LINK
 )
@@ -20,9 +20,9 @@ def get_start_keyboard():
 
 
 def get_module1_keyboard():
-    """Кнопки после выдачи Модуля 1"""
+    """Кнопки после выдачи Модуля 0 (бесплатный)"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📖 Открыть Модуль 1", url=NOTION_MODULE1)]
+        [InlineKeyboardButton(text="📖 Открыть Модуль", url=NOTION_MODULE0)]
     ])
     return keyboard
 
