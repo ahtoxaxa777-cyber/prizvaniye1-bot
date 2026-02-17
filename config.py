@@ -19,12 +19,12 @@ COURSE_PRICE = 9900  # в рублях
 NOTION_MODULE0 = "https://tame-headstand-52f.notion.site/0-30681644b85b809b8c5ce09eace5f114"
 
 # МОДУЛИ 1-10 (платные)
-NOTION_MODULE1 = "https://notion.so/module1"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE2 = "https://notion.so/module2"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE3 = "https://notion.so/module3"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE4 = "https://notion.so/module4"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE5 = "https://notion.so/module5"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE6 = "https://notion.so/module6"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE1 = "https://tame-headstand-52f.notion.site/1-30981644b85b80baa795c64ce13f936d?source=copy_link"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE2 = "https://tame-headstand-52f.notion.site/2-30981644b85b8041a494da6721a523f6?source=copy_link"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE3 = "https://tame-headstand-52f.notion.site/3-30981644b85b80ccb7afe698c6881e4e?source=copy_link"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE4 = "https://tame-headstand-52f.notion.site/4-30981644b85b802790dfd3318e315cb1?source=copy_link"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE5 = "https://tame-headstand-52f.notion.site/5-30981644b85b8087ae83cfd13a1d98b9?source=copy_link"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE6 = "https://tame-headstand-52f.notion.site/6-30981644b85b80bb87f6d2255d9f6682?source=copy_link"  # ВСТАВЬ ССЫЛКУ
 NOTION_MODULE7 = "https://notion.so/module7"  # ВСТАВЬ ССЫЛКУ
 NOTION_MODULE8 = "https://notion.so/module8"  # ВСТАВЬ ССЫЛКУ
 NOTION_MODULE9 = "https://notion.so/module9"  # ВСТАВЬ ССЫЛКУ
