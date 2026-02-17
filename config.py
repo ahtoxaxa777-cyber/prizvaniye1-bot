@@ -8,7 +8,7 @@
 
 # ========== ТОКЕНЫ (НЕ МЕНЯЙ) ==========
 BOT_TOKEN = "8350801824:AAEOrk3Ffb_8ffwYlIjDnK6erPTvIUUsKfQ"
-YOKASSA_TOKEN = "390SU0012:LIVE:89572"
+YOKASSA_TOKEN = "390540012:LIVE:89572"
 
 # ========== ЦЕНА КУРСА (МОЖНО МЕНЯТЬ) ==========
 COURSE_PRICE = 100  # в рублях
