@@ -50,7 +50,7 @@ def get_modules_keyboard(paid=False):
     if not paid:
         # Для неоплативших
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📖 Модуль 1 (бесплатно)", url=NOTION_MODULE1)],
+            [InlineKeyboardButton(text="📖 Модуль 1 (бесплатно)", url=NOTION_MODULE0)],
             [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")]
         ])
     else:
