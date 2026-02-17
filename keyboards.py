@@ -21,8 +21,8 @@ def get_start_keyboard():
 
 def get_module1_keyboard():
     """Кнопки после выдачи Модуля 0 (бесплатный)"""
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📖 Открыть Модуль", url=NOTION_MODULE0)]
+   keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📖 Открыть Модуль", url=NOTION_MODULE0)],
         [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")]
     ])
     return keyboard
