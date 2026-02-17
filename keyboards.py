@@ -11,7 +11,6 @@ from config import (
 
 
 def get_start_keyboard():
-    """Кнопки приветствия"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎁 Получить Модуль 1 (бесплатно)", callback_data="get_module1")],
         [InlineKeyboardButton(text="❓ Что это вообще такое?", callback_data="what_is_this")]
@@ -20,8 +19,7 @@ def get_start_keyboard():
 
 
 def get_module1_keyboard():
-    """Кнопки после выдачи Модуля 0 (бесплатный)"""
-   keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📖 Открыть Модуль", url=NOTION_MODULE0)],
         [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")]
     ])
@@ -29,7 +27,6 @@ def get_module1_keyboard():
 
 
 def get_buy_keyboard():
-    """Кнопки покупки"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎁 Получить Модуль 1", callback_data="get_module1")],
         [InlineKeyboardButton(text="💳 Купить сразу (9,900₽)", callback_data="buy_course")]
@@ -38,7 +35,6 @@ def get_buy_keyboard():
 
 
 def get_trigger_keyboard():
-    """Кнопки в триггерах"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")],
         [InlineKeyboardButton(text="📚 Посмотреть все модули", callback_data="show_modules")]
