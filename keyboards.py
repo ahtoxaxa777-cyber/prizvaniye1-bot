@@ -46,9 +46,16 @@ def get_modules_keyboard(paid=False):
     """Кнопки списка модулей"""
     if not paid:
         # Для неоплативших
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📖 Модуль 1 (бесплатно)", url=NOTION_MODULE0)],
-            [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ Модуль 0: Проблема (бесплатно)", url=NOTION_MODULE0)],
+        [InlineKeyboardButton(text="🔒 Модуль 1: Начало пути", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модуль 2: Диагностика", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модуль 3: Анализ прошлого", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модуль 4: Суперсилы", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модуль 5: Реальность рынка", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модуль 6: Первые шаги", callback_data="locked")],
+        [InlineKeyboardButton(text="🔒 Модули 7-10: Скоро", callback_data="locked")],
+        [InlineKeyboardButton(text="💳 Купить полный курс (9,900₽)", callback_data="buy_course")]
         ])
     else:
         # Для оплативших - все модули
