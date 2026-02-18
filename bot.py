@@ -208,6 +208,13 @@ async def main():
     # Запуск polling
     await dp.start_polling(bot)
 
+@dp.callback_query(F.data == "locked")
+async def locked_module(callback: CallbackQuery):
+    """Обработчик закрытых модулей"""
+    await callback.answer(
+        "🔒 Этот модуль доступен после покупки курса",
+        show_alert=True
+    )
 
 if __name__ == "__main__":
     asyncio.run(main())
