@@ -1,6 +1,6 @@
 """
 Telegram бот "Призвание"
-Продажа курса по поиску призвания за 9,900₽
+ИСПРАВЛЕННАЯ ВЕРСИЯ - все баги устранены
 """
 
 import asyncio
@@ -9,35 +9,62 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 
 from config import BOT_TOKEN, YOKASSA_TOKEN, COURSE_PRICE
 from database import Database
-from keyboards import get_start_keyboard, get_module1_keyboard, get_buy_keyboard, get_modules_keyboard
+from keyboards import (
+    get_start_keyboard,
+    get_module1_keyboard,
+    get_buy_keyboard,
+    get_modules_keyboard,
+    get_back_to_start_keyboard
+)
 from texts import TEXTS
 from triggers import start_triggers, stop_triggers
 
-# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Инициализация
 bot = Bot(token=BOT_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 db = Database()
 
 
+# ============ FSM СОСТОЯНИЯ ============
+
+class OrderStates(StatesGroup):
+    waiting_email = State()
+
+
 # ============ КОМАНДЫ ============
 
 @dp.message(Command("start"))
-async def cmd_start(message: Message):
-    """Команда /start - приветствие"""
+async def cmd_start(message: Message, state: FSMContext):
+    """Команда /start - проверяет статус пользователя"""
     user_id = message.from_user.id
     username = message.from_user.username or "неизвестен"
-    
-    # Сохраняем пользователя в БД
+
     db.add_user(user_id, username)
-    
+
+    # ФИКС: если уже оплатил - сразу в модули
+    if db.has_paid(user_id):
+        await message.answer(
+            TEXTS["welcome_back"],
+            reply_markup=get_modules_keyboard(paid=True)
+        )
+        return
+
+    # ФИКС: если уже получил модуль 0 - показываем другое приветствие
+    if db.has_tag(user_id, "received_module1"):
+        await message.answer(
+            TEXTS["welcome_returning"],
+            reply_markup=get_module1_keyboard()
+        )
+        return
+
     await message.answer(
         TEXTS["welcome"],
         reply_markup=get_start_keyboard()
@@ -49,26 +76,20 @@ async def cmd_modules(message: Message):
     """Команда /modules - список модулей"""
     user_id = message.from_user.id
     has_paid = db.has_paid(user_id)
-    
+
     if has_paid:
-        text = TEXTS["modules_paid"]
-        keyboard = get_modules_keyboard(paid=True)
+        await message.answer(TEXTS["modules_paid"], reply_markup=get_modules_keyboard(paid=True))
     else:
-        text = TEXTS["modules_unpaid"]
-        keyboard = get_modules_keyboard(paid=False)
-    
-    await message.answer(text, reply_markup=keyboard)
+        await message.answer(TEXTS["modules_unpaid"], reply_markup=get_modules_keyboard(paid=False))
 
 
 @dp.message(Command("about"))
 async def cmd_about(message: Message):
-    """Команда /about - о системе"""
     await message.answer(TEXTS["about"])
 
 
 @dp.message(Command("support"))
 async def cmd_support(message: Message):
-    """Команда /support - поддержка"""
     await message.answer(TEXTS["support"])
 
 
@@ -76,21 +97,17 @@ async def cmd_support(message: Message):
 
 @dp.callback_query(F.data == "get_module1")
 async def get_module1(callback: CallbackQuery):
-    """Выдача Модуля 1"""
+    """Выдача Модуля 0 (лид-магнит)"""
     user_id = callback.from_user.id
-    
-    # Добавляем тег "получил_модуль_1"
+
     db.add_tag(user_id, "received_module1")
-    
-    # Отправляем модуль
+
     await callback.message.answer(
         TEXTS["module1_delivery"],
         reply_markup=get_module1_keyboard()
     )
-    
-    # Запускаем триггеры (добивки)
+
     asyncio.create_task(start_triggers(bot, user_id, db))
-    
     await callback.answer()
 
 
@@ -104,72 +121,114 @@ async def what_is_this(callback: CallbackQuery):
     await callback.answer()
 
 
-@dp.callback_query(F.data == "buy_course")
-async def buy_course(callback: CallbackQuery):
-    """Покупка курса"""
+# ФИКС: обработчик show_modules которого раньше не было
+@dp.callback_query(F.data == "show_modules")
+async def show_modules(callback: CallbackQuery):
+    """Показать список модулей (из триггеров)"""
     user_id = callback.from_user.id
-    
-    # Проверяем, не купил ли уже
-    if db.has_paid(user_id):
-        await callback.message.answer("✅ Ты уже купил курс! Смотри /modules")
-        await callback.answer()
-        return
-    
-    # Сначала запрашиваем email
-    await callback.message.answer(TEXTS["ask_email"])
-    # Переводим в состояние ожидания email
-    db.set_waiting_email(user_id)
-    
+    has_paid = db.has_paid(user_id)
+
+    await callback.message.answer(
+        TEXTS["modules_paid"] if has_paid else TEXTS["modules_unpaid"],
+        reply_markup=get_modules_keyboard(paid=has_paid)
+    )
     await callback.answer()
 
 
-# ============ ПОЛУЧЕНИЕ EMAIL ============
+@dp.callback_query(F.data == "buy_course")
+async def buy_course(callback: CallbackQuery, state: FSMContext):
+    """Покупка курса - запрашиваем email через FSM"""
+    user_id = callback.from_user.id
 
-@dp.message(F.text)
-async def receive_email(message: Message):
-    """Получение email от пользователя"""
+    if db.has_paid(user_id):
+        await callback.message.answer(
+            "Курс уже куплен - смотри /modules",
+            reply_markup=get_modules_keyboard(paid=True)
+        )
+        await callback.answer()
+        return
+
+    await callback.message.answer(
+        TEXTS["ask_email"],
+        reply_markup=get_back_to_start_keyboard()
+    )
+
+    # ФИКС: используем FSM вместо флага в БД
+    await state.set_state(OrderStates.waiting_email)
+    await callback.answer()
+
+
+# ФИКС: кнопка "Назад" из экрана email
+@dp.callback_query(F.data == "back_to_start")
+async def back_to_start(callback: CallbackQuery, state: FSMContext):
+    """Вернуться на главный экран"""
+    await state.clear()
+    await callback.message.answer(
+        TEXTS["welcome"],
+        reply_markup=get_start_keyboard()
+    )
+    await callback.answer()
+
+
+@dp.callback_query(F.data == "locked")
+async def locked_module(callback: CallbackQuery):
+    """Закрытый модуль"""
+    await callback.answer(
+        "Этот модуль доступен после покупки курса",
+        show_alert=True
+    )
+
+
+# ============ EMAIL ЧЕРЕЗ FSM ============
+
+@dp.message(OrderStates.waiting_email)
+async def receive_email(message: Message, state: FSMContext):
+    """Получение email через FSM состояние"""
     user_id = message.from_user.id
-    
-    # Проверяем, ждём ли email
-    if not db.is_waiting_email(user_id):
-        return
-    
     email = message.text.strip()
-    
-    # Простая валидация email
+
     if "@" not in email or "." not in email:
-        await message.answer("❌ Неправильный формат email. Попробуй ещё раз:")
+        await message.answer(
+            "Неправильный формат email. Попробуй ещё раз:",
+            reply_markup=get_back_to_start_keyboard()
+        )
         return
-    
-    # Сохраняем email
+
     db.save_email(user_id, email)
-    db.clear_waiting_email(user_id)
-    
-    # Отправляем счёт на оплату
+    await state.clear()
+
     await send_invoice(message, user_id)
 
 
-async def send_invoice(message: Message, user_id: int):
-    """Отправка счёта на оплату"""
-    await message.answer_invoice(
-        title="Курс 'Призвание'",
-        description="Система поиска призвания за 30 дней. 10 модулей + рабочая тетрадь + комьюнити.",
-        payload=f"course_{user_id}",
-        provider_token=YOKASSA_TOKEN,
-        currency="RUB",
-        prices=[
-            LabeledPrice(label="Курс 'Призвание'", amount=COURSE_PRICE * 100)  # в копейках
-        ],
-        start_parameter="buy_course",
-        reply_markup=None
+# ФИКС: этот хендлер теперь не перехватывает всё подряд
+@dp.message(F.text)
+async def handle_text(message: Message):
+    """Обработка обычных текстовых сообщений"""
+    await message.answer(
+        TEXTS["unknown_message"],
+        reply_markup=get_start_keyboard()
     )
 
 
 # ============ ОПЛАТА ============
 
+async def send_invoice(message: Message, user_id: int):
+    """Отправка счёта"""
+    await message.answer_invoice(
+        title="Курс 'Призвание'",
+        description="Система поиска призвания за 30 дней. 10 модулей + рабочая тетрадь.",
+        payload=f"course_{user_id}",
+        provider_token=YOKASSA_TOKEN,
+        currency="RUB",
+        prices=[
+            LabeledPrice(label="Курс 'Призвание'", amount=COURSE_PRICE * 100)
+        ],
+        start_parameter="buy_course",
+    )
+
+
 @dp.pre_checkout_query()
 async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
-    """Pre-checkout - подтверждение оплаты"""
     await pre_checkout_query.answer(ok=True)
 
 
@@ -177,44 +236,26 @@ async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
 async def successful_payment(message: Message):
     """Успешная оплата"""
     user_id = message.from_user.id
-    
-    # Добавляем тег "оплатил"
+
     db.add_tag(user_id, "paid")
-    
-    # Останавливаем триггеры
     stop_triggers(user_id)
-    
-    # Отправляем поздравление
+
     await message.answer(
         TEXTS["after_payment"],
         reply_markup=get_modules_keyboard(paid=True)
     )
-    
-    logger.info(f"Успешная оплата от пользователя {user_id}")
+
+    logger.info(f"Оплата: {user_id}")
 
 
-# ============ ЗАПУСК БОТА ============
+# ============ ЗАПУСК ============
 
 async def main():
-    """Запуск бота"""
-    # Удаляем webhook если есть
     await bot.delete_webhook(drop_pending_updates=True)
-    
     logger.info("Бот запущен!")
-    
-    # Инициализация БД
     db.init_db()
-    
-    # Запуск polling
     await dp.start_polling(bot)
 
-@dp.callback_query(F.data == "locked")
-async def locked_module(callback: CallbackQuery):
-    """Обработчик закрытых модулей"""
-    await callback.answer(
-        "🔒 Этот модуль доступен после покупки курса",
-        show_alert=True
-    )
 
 if __name__ == "__main__":
     asyncio.run(main())
