@@ -98,9 +98,7 @@ git push -u origin main
 2. Перейди на вкладку **"Variables"**
 3. Добавь (если хочешь скрыть токены из кода):
 
-```
-BOT_TOKEN=8350801824:AAEOrk3Ffb_8ffwYlIjDnK6erPTvIUUsKfQ
-YOKASSA_TOKEN=1268251:live_8qTPlKzYK16XLixZTYM1s2Dd46scDkO-h0HtYNJw4HM
+``
 ```
 
 **Это опционально!** Токены уже прописаны в `config.py`, но для безопасности лучше вынести в переменные.
@@ -110,9 +108,6 @@ YOKASSA_TOKEN=1268251:live_8qTPlKzYK16XLixZTYM1s2Dd46scDkO-h0HtYNJw4HM
 ```python
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8350801824:AAEOrk3Ffb_8ffwYlIjDnK6erPTvIUUsKfQ")
-YOKASSA_TOKEN = os.getenv("YOKASSA_TOKEN", "1268251:live_8qTPlKzYK16XLixZTYM1s2Dd46scDkO-h0HtYNJw4HM")
-```
 
 ---
 
@@ -245,7 +240,7 @@ SELECT COUNT(*) FROM tags WHERE tag='paid';  # Сколько купили
 **Решение:**
 1. Проверь что ЮKassa токен правильный
 2. Формат: `ShopID:SecretKey`
-3. У тебя: `1268251:live_8qTPlKzYK16XLixZTYM1s2Dd46scDkO-h0HtYNJw4HM`
+3. У тебя: `
 
 ### Триггеры не приходят
 
