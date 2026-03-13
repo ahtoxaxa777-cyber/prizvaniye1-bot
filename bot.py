@@ -12,7 +12,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from config import BOT_TOKEN, YOKASSA_TOKEN, COURSE_PRICE
+from config import BOT_TOKEN, YOKASSA_TOKEN, COURSE_PRICE, ADMIN_ID
 from database import Database
 from keyboards import (
     get_start_keyboard,
@@ -91,6 +91,42 @@ async def cmd_about(message: Message):
 @dp.message(Command("support"))
 async def cmd_support(message: Message):
     await message.answer(TEXTS["support"])
+
+@dp.message(Command("stats"))
+async def cmd_stats(message: Message):
+    """Команда /stats - статистика (только для админа)"""
+    # Проверяем что это ты
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    stats = db.get_stats()
+
+    # Конверсия из модуля в оплату
+    conversion = 0
+    if stats['got_module'] > 0:
+        conversion = round(stats['paid'] / stats['got_module'] * 100, 1)
+
+    text = f"""📊 Статистика
+
+Всего пользователей: {stats['total']}
+Получили модуль 0: {stats['got_module']}
+Оплатили курс: {stats['paid']}
+Конверсия модуль→оплата: {conversion}%
+
+"""
+
+    if stats['paid_users']:
+        text += "💰 Кто купил:\n"
+        for username, email, date in stats['paid_users']:
+            name = f"@{username}" if username else "без username"
+            mail = email if email else "email не указан"
+            # Берём только дату без времени
+            day = date[:10] if date else "?"
+            text += f"- {name} | {mail} | {day}\n"
+    else:
+        text += "Покупок пока нет."
+
+    await message.answer(text)
 
 
 # ============ КНОПКИ ============
