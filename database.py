@@ -141,30 +141,27 @@ class Database:
         
         conn.close()
         return users
-        def get_stats(self):
-        """Статистика для админа"""
+        
+       def get_stats(self):
+            """Статистика для админа"""
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
 
-        # Всего пользователей
         cursor.execute('SELECT COUNT(*) FROM users')
         total_users = cursor.fetchone()[0]
 
-        # Получили модуль 0
         cursor.execute(
             'SELECT COUNT(*) FROM tags WHERE tag = ?',
             ('received_module1',)
         )
         got_module = cursor.fetchone()[0]
 
-        # Оплатили
         cursor.execute(
             'SELECT COUNT(*) FROM tags WHERE tag = ?',
             ('paid',)
         )
         paid = cursor.fetchone()[0]
 
-        # Список оплативших с датой
         cursor.execute('''
             SELECT u.username, u.email, t.created_at
             FROM users u
