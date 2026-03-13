@@ -9,6 +9,7 @@
 # ========== ТОКЕНЫ (НЕ МЕНЯЙ) ==========
 BOT_TOKEN = "8350801824:AAENAGJqoa2JMD6BL3WgKqZBpyuOW2CmhlQ"
 YOKASSA_TOKEN = "live_Z_GQ6aCjzuY4VDNyAjOrt8DYE9kM15OwH2U9eLNUtZA"
+ADMIN_ID = 730078633
 
 # ========== ЦЕНА КУРСА (МОЖНО МЕНЯТЬ) ==========
 COURSE_PRICE = 9900  # в рублях
