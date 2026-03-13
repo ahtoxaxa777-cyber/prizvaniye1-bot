@@ -142,8 +142,8 @@ class Database:
         conn.close()
         return users
         
-       def get_stats(self):
-            """Статистика для админа"""
+      def get_stats(self):
+        """Статистика для админа"""
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
 
