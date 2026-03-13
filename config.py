@@ -20,16 +20,16 @@ COURSE_PRICE = 9900  # в рублях
 NOTION_MODULE0 = "https://tame-headstand-52f.notion.site/0-30681644b85b809b8c5ce09eace5f114"
 
 # МОДУЛИ 1-10 (платные)
-NOTION_MODULE1 = "https://tame-headstand-52f.notion.site/1-30981644b85b80baa795c64ce13f936d?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE2 = "https://tame-headstand-52f.notion.site/2-30981644b85b8041a494da6721a523f6?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE3 = "https://tame-headstand-52f.notion.site/3-30981644b85b80ccb7afe698c6881e4e?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE4 = "https://tame-headstand-52f.notion.site/4-30981644b85b802790dfd3318e315cb1?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE5 = "https://tame-headstand-52f.notion.site/5-30981644b85b8087ae83cfd13a1d98b9?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE6 = "https://tame-headstand-52f.notion.site/6-30981644b85b80bb87f6d2255d9f6682?source=copy_link"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE7 = "https://notion.so/module7"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE8 = "https://notion.so/module8"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE9 = "https://notion.so/module9"  # ВСТАВЬ ССЫЛКУ
-NOTION_MODULE10 = "https://notion.so/module10"  # ВСТАВЬ ССЫЛКУ
+NOTION_MODULE1 = "https://tame-headstand-52f.notion.site/1-32281644b85b802d9c1df872182ffd79?source=copy_link" # финальная
+NOTION_MODULE2 = "https://tame-headstand-52f.notion.site/2-30981644b85b8041a494da6721a523f6?source=copy_link" # финальная
+NOTION_MODULE3 = "https://tame-headstand-52f.notion.site/3-30981644b85b80ccb7afe698c6881e4e?source=copy_link" # финальная
+NOTION_MODULE4 = "https://tame-headstand-52f.notion.site/4-32281644b85b80bc8401d7fb6e5090c6?source=copy_link" # финальная
+NOTION_MODULE5 = "https://tame-headstand-52f.notion.site/5-32281644b85b80eda382debcd1619389?source=copy_link" # финальная
+NOTION_MODULE6 = "https://tame-headstand-52f.notion.site/6-32281644b85b80658c87d4e79d37e155?source=copy_link" # финальная
+NOTION_MODULE7 = "https://tame-headstand-52f.notion.site/7-MVP-32281644b85b80cfa17ce9dc65014ec3?source=copy_link" # финальная
+NOTION_MODULE8 = "https://tame-headstand-52f.notion.site/8-32281644b85b80ad9d37d3d73c993cf9?source=copy_link" # финальная
+NOTION_MODULE9 = "https://tame-headstand-52f.notion.site/9-32281644b85b806fbbd8cd8b9d9c5630?source=copy_link" # финальная
+NOTION_MODULE10 = "https://tame-headstand-52f.notion.site/10-32281644b85b804e92c4d57b32ca4a95?source=copy_link" # финальная
 
 # Комьюнити и поддержка
 COMMUNITY_LINK = "https://t.me/+MNSHhaRMFk9iMjJi"  # Закрытая группа
