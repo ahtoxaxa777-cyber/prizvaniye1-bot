@@ -6,6 +6,8 @@ Telegram бот "Призвание"
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, F
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.fsm.storage.memory import MemoryStorage
@@ -27,7 +29,7 @@ from triggers import start_triggers, stop_triggers
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 db = Database()
