@@ -1,18 +1,18 @@
-# ОБНОВЛЁННЫЙ CONFIG.PY
-# Скопируй и замени содержимое файла config.py на GitHub
-
 """
 Конфигурация бота
 ВАЖНО: Здесь хранятся все ключи и настройки
 """
 
-# ========== ТОКЕНЫ (НЕ МЕНЯЙ) ==========
-BOT_TOKEN = "8350801824:AAENAGJqoa2JMD6BL3WgKqZBpyuOW2CmhlQ"
-YOKASSA_TOKEN = "390540012:LIVE:89572"
-ADMIN_ID = 730078633
+import os
+
+# ========== ТОКЕНЫ ==========
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+YOKASSA_TOKEN = os.environ["YOKASSA_TOKEN"]
+ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 # ========== ЦЕНА КУРСА (МОЖНО МЕНЯТЬ) ==========
-COURSE_PRICE = 9900  # в рублях
+COURSE_PRICE = 9900      # в рублях
+DIAGNOSTIC_PRICE = 1490  # в рублях
 
 # ========== ССЫЛКИ (МЕНЯЙ ЗДЕСЬ) ==========
 

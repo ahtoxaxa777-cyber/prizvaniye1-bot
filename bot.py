@@ -8,13 +8,13 @@ import logging
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from config import BOT_TOKEN, YOKASSA_TOKEN, COURSE_PRICE, ADMIN_ID
+from config import BOT_TOKEN, YOKASSA_TOKEN, COURSE_PRICE, DIAGNOSTIC_PRICE, ADMIN_ID
 from database import Database
 from keyboards import (
     get_start_keyboard,
@@ -23,7 +23,7 @@ from keyboards import (
     get_modules_keyboard,
     get_back_to_start_keyboard
 )
-from texts import TEXTS
+from texts import TEXTS, DIAGNOSTIC_QUESTIONS
 from triggers import start_triggers, stop_triggers
 
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +41,30 @@ class OrderStates(StatesGroup):
     waiting_email = State()
 
 
+class DiagnosticStates(StatesGroup):
+    waiting_email = State()
+    q1 = State()
+    q2 = State()
+    q3 = State()
+    q4 = State()
+    q5 = State()
+    q6 = State()
+    q7 = State()
+    q8 = State()
+    q9 = State()
+    q10 = State()
+    q11 = State()
+    q12 = State()
+
+
+DIAGNOSTIC_QUESTION_STATES = [
+    DiagnosticStates.q1, DiagnosticStates.q2, DiagnosticStates.q3,
+    DiagnosticStates.q4, DiagnosticStates.q5, DiagnosticStates.q6,
+    DiagnosticStates.q7, DiagnosticStates.q8, DiagnosticStates.q9,
+    DiagnosticStates.q10, DiagnosticStates.q11, DiagnosticStates.q12,
+]
+
+
 # ============ КОМАНДЫ ============
 
 @dp.message(Command("start"))
@@ -51,7 +75,6 @@ async def cmd_start(message: Message, state: FSMContext):
 
     db.add_user(user_id, username)
 
-    # ФИКС: если уже оплатил - сразу в модули
     if db.has_paid(user_id):
         await message.answer(
             TEXTS["welcome_back"],
@@ -59,7 +82,6 @@ async def cmd_start(message: Message, state: FSMContext):
         )
         return
 
-    # ФИКС: если уже получил модуль 0 - показываем другое приветствие
     if db.has_tag(user_id, "received_module1"):
         await message.answer(
             TEXTS["welcome_returning"],
@@ -94,16 +116,15 @@ async def cmd_about(message: Message):
 async def cmd_support(message: Message):
     await message.answer(TEXTS["support"])
 
+
 @dp.message(Command("stats"))
 async def cmd_stats(message: Message):
     """Команда /stats - статистика (только для админа)"""
-    # Проверяем что это ты
     if message.from_user.id != ADMIN_ID:
         return
 
     stats = db.get_stats()
 
-    # Конверсия из модуля в оплату
     conversion = 0
     if stats['got_module'] > 0:
         conversion = round(stats['paid'] / stats['got_module'] * 100, 1)
@@ -122,7 +143,6 @@ async def cmd_stats(message: Message):
         for username, email, date in stats['paid_users']:
             name = f"@{username}" if username else "без username"
             mail = email if email else "email не указан"
-            # Берём только дату без времени
             day = date[:10] if date else "?"
             text += f"- {name} | {mail} | {day}\n"
     else:
@@ -159,7 +179,6 @@ async def what_is_this(callback: CallbackQuery):
     await callback.answer()
 
 
-# ФИКС: обработчик show_modules которого раньше не было
 @dp.callback_query(F.data == "show_modules")
 async def show_modules(callback: CallbackQuery):
     """Показать список модулей (из триггеров)"""
@@ -190,13 +209,30 @@ async def buy_course(callback: CallbackQuery, state: FSMContext):
         TEXTS["ask_email"],
         reply_markup=get_back_to_start_keyboard()
     )
-
-    # ФИКС: используем FSM вместо флага в БД
     await state.set_state(OrderStates.waiting_email)
     await callback.answer()
 
 
-# ФИКС: кнопка "Назад" из экрана email
+@dp.callback_query(F.data == "buy_diagnostic")
+async def buy_diagnostic(callback: CallbackQuery, state: FSMContext):
+    """Покупка диагностики - запрашиваем email через FSM"""
+    user_id = callback.from_user.id
+
+    if db.has_tag(user_id, "diagnostic_paid"):
+        await callback.message.answer(
+            "Диагностика уже оплачена. Ожидай разбора в течение 24 часов."
+        )
+        await callback.answer()
+        return
+
+    await callback.message.answer(
+        TEXTS["ask_email_diagnostic"],
+        reply_markup=get_back_to_start_keyboard()
+    )
+    await state.set_state(DiagnosticStates.waiting_email)
+    await callback.answer()
+
+
 @dp.callback_query(F.data == "back_to_start")
 async def back_to_start(callback: CallbackQuery, state: FSMContext):
     """Вернуться на главный экран"""
@@ -221,7 +257,7 @@ async def locked_module(callback: CallbackQuery):
 
 @dp.message(OrderStates.waiting_email)
 async def receive_email(message: Message, state: FSMContext):
-    """Получение email через FSM состояние"""
+    """Получение email для покупки курса"""
     user_id = message.from_user.id
     email = message.text.strip()
 
@@ -234,11 +270,65 @@ async def receive_email(message: Message, state: FSMContext):
 
     db.save_email(user_id, email)
     await state.clear()
-
     await send_invoice(message, user_id)
 
 
-# ФИКС: этот хендлер теперь не перехватывает всё подряд
+@dp.message(DiagnosticStates.waiting_email)
+async def receive_diagnostic_email(message: Message, state: FSMContext):
+    """Получение email для покупки диагностики"""
+    user_id = message.from_user.id
+    email = message.text.strip()
+
+    if "@" not in email or "." not in email:
+        await message.answer(
+            "Неправильный формат email. Попробуй ещё раз:",
+            reply_markup=get_back_to_start_keyboard()
+        )
+        return
+
+    db.save_email(user_id, email)
+    await state.clear()
+    await send_diagnostic_invoice(message, user_id)
+
+
+# ============ ДИАГНОСТИКА — ВОПРОСЫ ============
+
+@dp.message(StateFilter(
+    DiagnosticStates.q1, DiagnosticStates.q2, DiagnosticStates.q3,
+    DiagnosticStates.q4, DiagnosticStates.q5, DiagnosticStates.q6,
+    DiagnosticStates.q7, DiagnosticStates.q8, DiagnosticStates.q9,
+    DiagnosticStates.q10, DiagnosticStates.q11, DiagnosticStates.q12,
+))
+async def handle_diagnostic_answer(message: Message, state: FSMContext):
+    """Универсальный обработчик ответов на 12 вопросов диагностики"""
+    data = await state.get_data()
+    idx = data.get("q_index", 0)
+    answers = data.get("answers", [])
+    answers.append(message.text)
+
+    if idx < 11:
+        next_idx = idx + 1
+        await state.set_state(DIAGNOSTIC_QUESTION_STATES[next_idx])
+        await state.update_data(answers=answers, q_index=next_idx)
+        await message.answer(
+            f"*Вопрос {next_idx + 1} из 12*\n\n{DIAGNOSTIC_QUESTIONS[next_idx]}"
+        )
+    else:
+        await state.clear()
+        await message.answer(TEXTS["diagnostic_complete"])
+
+        user = message.from_user
+        username = f"@{user.username}" if user.username else f"id:{user.id}"
+        name = user.full_name or username
+
+        admin_text = f"📋 *Диагностика завершена*\n{name} | {username}\n\n"
+        for i, (q, a) in enumerate(zip(DIAGNOSTIC_QUESTIONS, answers), 1):
+            admin_text += f"*{i}.* {q}\n_{a}_\n\n"
+
+        await bot.send_message(ADMIN_ID, admin_text)
+
+
+# ФИКС: этот хендлер не перехватывает FSM-состояния
 @dp.message(F.text)
 async def handle_text(message: Message):
     """Обработка обычных текстовых сообщений"""
@@ -251,7 +341,7 @@ async def handle_text(message: Message):
 # ============ ОПЛАТА ============
 
 async def send_invoice(message: Message, user_id: int):
-    """Отправка счёта"""
+    """Отправка счёта за курс"""
     await message.answer_invoice(
         title="Курс 'Призвание'",
         description="Система поиска призвания за 30 дней. 10 модулей + рабочая тетрадь.",
@@ -265,25 +355,58 @@ async def send_invoice(message: Message, user_id: int):
     )
 
 
+async def send_diagnostic_invoice(message: Message, user_id: int):
+    """Отправка счёта за диагностику"""
+    await message.answer_invoice(
+        title="Персональная диагностика",
+        description="12 вопросов → персональный разбор твоей ситуации за 24 часа",
+        payload=f"diagnostic_{user_id}",
+        provider_token=YOKASSA_TOKEN,
+        currency="RUB",
+        prices=[
+            LabeledPrice(label="Персональная диагностика", amount=DIAGNOSTIC_PRICE * 100)
+        ],
+        start_parameter="buy_diagnostic",
+    )
+
+
 @dp.pre_checkout_query()
 async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
     await pre_checkout_query.answer(ok=True)
 
 
 @dp.message(F.successful_payment)
-async def successful_payment(message: Message):
-    """Успешная оплата"""
+async def successful_payment(message: Message, state: FSMContext):
+    """Успешная оплата — маршрутизация по payload"""
     user_id = message.from_user.id
+    payload = message.successful_payment.invoice_payload
 
-    db.add_tag(user_id, "paid")
-    stop_triggers(user_id)
+    if payload.startswith("diagnostic_"):
+        db.add_tag(user_id, "diagnostic_paid")
 
-    await message.answer(
-        TEXTS["after_payment"],
-        reply_markup=get_modules_keyboard(paid=True)
-    )
+        username = f"@{message.from_user.username}" if message.from_user.username else f"id:{user_id}"
+        await bot.send_message(
+            ADMIN_ID,
+            f"💰 *Новая оплата диагностики!*\n{username} | 1 490 ₽"
+        )
 
-    logger.info(f"Оплата: {user_id}")
+        await message.answer(TEXTS["diagnostic_confirmed"])
+        await state.set_state(DiagnosticStates.q1)
+        await state.update_data(answers=[], q_index=0)
+        await message.answer(f"*Вопрос 1 из 12*\n\n{DIAGNOSTIC_QUESTIONS[0]}")
+
+        logger.info(f"Оплата диагностики: {user_id}")
+
+    else:
+        db.add_tag(user_id, "paid")
+        stop_triggers(user_id)
+
+        await message.answer(
+            TEXTS["after_payment"],
+            reply_markup=get_modules_keyboard(paid=True)
+        )
+
+        logger.info(f"Оплата курса: {user_id}")
 
 
 # ============ ЗАПУСК ============

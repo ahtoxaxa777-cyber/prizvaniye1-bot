@@ -16,6 +16,7 @@ def get_start_keyboard():
     """Кнопки приветствия"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Получить Модуль 0 (бесплатно)", callback_data="get_module1")],
+        [InlineKeyboardButton(text="Пройти диагностику — 1 490 ₽", callback_data="buy_diagnostic")],
         [InlineKeyboardButton(text="Что это такое?", callback_data="what_is_this")]
     ])
 
