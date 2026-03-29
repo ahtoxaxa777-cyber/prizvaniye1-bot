@@ -6,7 +6,7 @@
 import os
 
 # ========== ТОКЕНЫ ==========
-BOT_TOKEN = os.environ["BOT_TOKEN"]
+BOT_TOKEN = os.environ.get("BOT_TOKEN") or os.environ["API_TOKEN"]
 YOKASSA_TOKEN = os.environ["YOKASSA_TOKEN"]
 ADMIN_ID = int(os.environ["ADMIN_ID"])
 
