@@ -139,6 +139,38 @@ class Database:
         conn.close()
         return users
 
+    def has_email(self, user_id):
+        """Проверить, есть ли непустой email у пользователя"""
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT email FROM users WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+
+        conn.close()
+        return bool(result and result[0])
+
+    def get_all_emails(self):
+        """Вернуть все записи с непустым email"""
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT u.username, u.email, u.created_at,
+                   CASE
+                       WHEN EXISTS (SELECT 1 FROM tags t WHERE t.user_id = u.user_id AND t.tag = 'paid') THEN 'курс'
+                       WHEN EXISTS (SELECT 1 FROM tags t WHERE t.user_id = u.user_id AND t.tag = 'diagnostic_paid') THEN 'диаг'
+                       ELSE 'модуль0'
+                   END AS source
+            FROM users u
+            WHERE u.email IS NOT NULL AND u.email != ''
+            ORDER BY u.created_at DESC
+        ''')
+
+        result = cursor.fetchall()
+        conn.close()
+        return result
+
     def get_stats(self):
         """Статистика для админа"""
         conn = sqlite3.connect(self.db_file)

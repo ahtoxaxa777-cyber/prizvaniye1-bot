@@ -41,6 +41,10 @@ class OrderStates(StatesGroup):
     waiting_email = State()
 
 
+class Module0EmailState(StatesGroup):
+    waiting_email = State()
+
+
 class DiagnosticStates(StatesGroup):
     waiting_email = State()
     q1 = State()
@@ -151,10 +155,38 @@ async def cmd_stats(message: Message):
     await message.answer(text)
 
 
+@dp.message(Command("emails"))
+async def cmd_emails(message: Message):
+    """Команда /emails - список email (только для админа)"""
+    if message.from_user.id != ADMIN_ID:
+        return
+
+    emails = db.get_all_emails()
+
+    if not emails:
+        await message.answer("Email пока нет.")
+        return
+
+    lines = []
+    addresses = []
+    for username, email, created_at, source in emails:
+        name = f"@{username}" if username else "без username"
+        day = created_at[:10] if created_at else "?"
+        lines.append(f"- {name} | {email} | {source} | {day}")
+        addresses.append(email)
+
+    text = "📧 *Email адреса:*\n\n"
+    text += "\n".join(lines)
+    text += "\n\n*Только адреса (для копирования):*\n"
+    text += "\n".join(addresses)
+
+    await message.answer(text)
+
+
 # ============ КНОПКИ ============
 
 @dp.callback_query(F.data == "get_module1")
-async def get_module1(callback: CallbackQuery):
+async def get_module1(callback: CallbackQuery, state: FSMContext):
     """Выдача Модуля 0 (лид-магнит)"""
     user_id = callback.from_user.id
 
@@ -166,6 +198,12 @@ async def get_module1(callback: CallbackQuery):
     )
 
     asyncio.create_task(start_triggers(bot, user_id, db))
+
+    if not db.has_email(user_id):
+        await asyncio.sleep(1)
+        await callback.message.answer(TEXTS["email_after_module0"])
+        await state.set_state(Module0EmailState.waiting_email)
+
     await callback.answer()
 
 
@@ -254,6 +292,24 @@ async def locked_module(callback: CallbackQuery):
 
 
 # ============ EMAIL ЧЕРЕЗ FSM ============
+
+@dp.message(Module0EmailState.waiting_email)
+async def receive_module0_email(message: Message, state: FSMContext):
+    """Получение email после Модуля 0"""
+    user_id = message.from_user.id
+    email = message.text.strip()
+
+    if "@" in email and "." in email:
+        db.save_email(user_id, email)
+        await state.clear()
+        await message.answer(TEXTS["email_after_module0_thanks"])
+
+        username = f"@{message.from_user.username}" if message.from_user.username else f"id:{user_id}"
+        await bot.send_message(ADMIN_ID, f"📧 Новый email с Модуля 0\n{username} | {email}")
+    else:
+        await state.clear()
+        await message.answer(TEXTS["unknown_message"], reply_markup=get_start_keyboard())
+
 
 @dp.message(OrderStates.waiting_email)
 async def receive_email(message: Message, state: FSMContext):
