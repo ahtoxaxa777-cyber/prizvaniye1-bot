@@ -12,7 +12,7 @@ ADMIN_ID = int(os.environ["ADMIN_ID"])
 
 # ========== ЦЕНА КУРСА (МОЖНО МЕНЯТЬ) ==========
 COURSE_PRICE = 9900      # в рублях
-DIAGNOSTIC_PRICE = 10  # в рублях
+DIAGNOSTIC_PRICE = 1490  # в рублях
 
 # ========== ССЫЛКИ (МЕНЯЙ ЗДЕСЬ) ==========
 
